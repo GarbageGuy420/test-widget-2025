@@ -34,46 +34,43 @@
 </head>
 <body>
     <h3>Select Tattoo Placement</h3>
-
     <div id="placement-options">
         <div class="option" data-placement="ARM">ARM</div>
         <div class="option" data-placement="LEG">LEG</div>
         <div class="option" id="torso-option" class="option" data-placement="TORSO">TORSO</div>
     </div>
-
     <script>
-        let firstTattoo = false;  // Default: Not first tattoo
-        let selectedOption = null; // Track selected option
+        let selectedOption = null;
 
-        // Function to send data to the form
         function sendPlacement(selection) {
             JFCustomWidget.sendData({ value: selection });
         }
 
-        // Handle option selection with visual feedback
         document.querySelectorAll(".option").forEach(option => {
             option.addEventListener("click", function() {
                 if (!this.classList.contains("disabled")) {
-                    // Remove previous selection
                     if (selectedOption) selectedOption.classList.remove("selected");
-
-                    // Mark new selection
                     this.classList.add("selected");
                     selectedOption = this;
-
-                    // Send data to Jotform
                     sendPlacement(this.getAttribute("data-placement"));
                 }
             });
         });
 
-        // Listen for parent form data (first tattoo YES/NO)
-        JFCustomWidget.subscribe("ready", function() {
-            firstTattoo = JFCustomWidget.getWidgetSetting("firstTattoo") === "YES";
+        function checkFirstTattooStatus() {
+            JFCustomWidget.getWidgetSettings((settings) => {
+                const firstTattoo = settings.typeA === "YES";
+                const torsoOption = document.getElementById("torso-option");
+                if (firstTattoo) {
+                    torsoOption.classList.add("disabled");
+                } else {
+                    torsoOption.classList.remove("disabled");
+                }
+            });
+        }
 
-            if (firstTattoo) {
-                document.getElementById("torso-option").classList.add("disabled");
-            }
+        JFCustomWidget.subscribe("ready", function() {
+            checkFirstTattooStatus();
         });
     </script>
 </body>
