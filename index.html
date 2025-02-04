@@ -37,14 +37,11 @@
     <div id="placement-options">
         <div class="option" data-placement="ARM">ARM</div>
         <div class="option" data-placement="LEG">LEG</div>
-        <div class="option" id="torso-option" class="option" data-placement="TORSO">TORSO</div>
+        <div class="option" id="torso-option" data-placement="TORSO">TORSO</div>
     </div>
 
     <script>
         let selectedOption = null;
-        const formId = "250346801308047";  // Your Jotform Form ID
-        const apiKey = "abf542a7c03442549209029236286710";  // Your Jotform API Key
-        const fieldName = "typeA";  // Unique Name for "Is this your first tattoo?"
 
         function sendPlacement(selection) {
             JFCustomWidget.sendData({ value: selection });
@@ -61,33 +58,31 @@
             });
         });
 
-        function checkFirstTattooStatus() {
-            fetch(`https://api.jotform.com/form/${formId}/submissions?apiKey=${apiKey}`)
-                .then(response => response.json())
-                .then(data => {
-                    let firstTattooValue = null;
-                    
-                    if (data.content && data.content.length > 0) {
-                        Object.values(data.content[0].answers).forEach(answer => {
-                            if (answer.name === fieldName) {
-                                firstTattooValue = answer.answer;
-                            }
-                        });
-                    }
-
-                    const torsoOption = document.getElementById("torso-option");
-
-                    if (firstTattooValue && firstTattooValue.toLowerCase() === "yes") {
-                        torsoOption.classList.add("disabled");
-                    } else {
-                        torsoOption.classList.remove("disabled");
-                    }
-                })
-                .catch(error => console.error("Error fetching Jotform API:", error));
+        function disableTorsoOption(isFirstTattoo) {
+            const torsoOption = document.getElementById("torso-option");
+            if (isFirstTattoo) {
+                torsoOption.classList.add("disabled");
+            } else {
+                torsoOption.classList.remove("disabled");
+            }
         }
 
         JFCustomWidget.subscribe("ready", function() {
-            checkFirstTattooStatus();
+            // Initial check
+            const isFirstTattoo = JFCustomWidget.getWidgetSetting("typeA") === "YES";
+            disableTorsoOption(isFirstTattoo);
+        });
+
+        JFCustomWidget.subscribe("submit", function(data) {
+            // Listen for form submissions if needed
+        });
+
+        // Listen for changes in the parent form
+        window.addEventListener("message", function(event) {
+            if (event.data && event.data.type === "control_radio" && event.data.name === "typeA") {
+                const isFirstTattoo = event.data.value === "YES";
+                disableTorsoOption(isFirstTattoo);
+            }
         });
     </script>
 </body>
