@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Body Placement Widget</title>
     <script src="//js.jotform.com/JotFormCustomWidget.min.js"></script>
+    <script src="https://js.jotform.com/JotForm.js"></script> <!-- ✅ Added JotForm API -->
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .option {
@@ -67,6 +68,9 @@
             }
         }
 
+        // ✅ Initialize JotForm API with your key
+        JF.initialize({ apiKey: 'abf542a7c03442549209029236286710' });
+
         // ✅ Listen for changes to "Is this your first tattoo?" field
         JFCustomWidget.subscribe("change", function(data) {
             if (data && data.name === "typeA") {
@@ -80,7 +84,19 @@
 
         // ✅ Ensure "TORSO" is disabled when the widget first loads
         JFCustomWidget.subscribe("ready", function() {
-            console.log("Widget Ready: Waiting for first tattoo selection...");
+            console.log("Widget Ready: Fetching initial first tattoo status...");
+
+            // ✅ Fetch form data using API
+            JF.getFormSubmissions("250346801308047", function(response) {
+                if (response && response.content && response.content.length > 0) {
+                    let latestSubmission = response.content[0];
+                    if (latestSubmission.answers && latestSubmission.answers["typeA"]) {
+                        console.log("Initial First Tattoo Response:", latestSubmission.answers["typeA"]);
+                        const isFirstTattoo = latestSubmission.answers["typeA"] === "input_3_0"; // Adjust as needed
+                        disableTorsoOption(isFirstTattoo);
+                    }
+                }
+            });
         });
 
     </script>
