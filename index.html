@@ -21,7 +21,7 @@
             background-color: #f0f0f0;
         }
         .selected {
-            background-color: #4CAF50 !important; /* Green for selected */
+            background-color: #4CAF50 !important;
             color: white;
         }
         .disabled {
@@ -67,11 +67,9 @@
             }
         }
 
-        // ✅ This function runs when the widget is fully loaded
+        // ✅ Fetch First Tattoo field correctly from Jotform
         JFCustomWidget.subscribe("ready", function() {
-            console.log("Widget is ready. Fetching first tattoo status...");
-
-            // Get the value of "Is this your first tattoo?" field (typeA)
+            console.log("Widget Ready: Fetching 'First Tattoo' status...");
             JFCustomWidget.getWidgetSetting("typeA", function(value) {
                 console.log("First Tattoo Response:", value);
                 const isFirstTattoo = value && value.toLowerCase() === "yes";
@@ -79,10 +77,10 @@
             });
         });
 
-        // ✅ This function listens for real-time changes
+        // ✅ Listen for real-time form changes
         JFCustomWidget.subscribe("change", function(data) {
-            if (data && data.type === "control_radio" && data.name === "typeA") {
-                console.log("First Tattoo Response Changed:", data.value);
+            if (data && data.name === "typeA") {
+                console.log("First Tattoo Changed:", data.value);
                 const isFirstTattoo = data.value.toLowerCase() === "yes";
                 disableTorsoOption(isFirstTattoo);
             }
