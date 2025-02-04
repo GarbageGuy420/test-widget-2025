@@ -39,6 +39,7 @@
         <div class="option" data-placement="LEG">LEG</div>
         <div class="option" id="torso-option" class="option" data-placement="TORSO">TORSO</div>
     </div>
+
     <script>
         let selectedOption = null;
 
@@ -58,15 +59,18 @@
         });
 
         function checkFirstTattooStatus() {
-            JFCustomWidget.getWidgetSettings((settings) => {
-                const firstTattoo = settings.typeA === "YES";
-                const torsoOption = document.getElementById("torso-option");
-                if (firstTattoo) {
-                    torsoOption.classList.add("disabled");
+            try {
+                // Get the parent form's radio button for "Is this your first tattoo?"
+                const firstTattooYes = window.parent.document.querySelector("#input_3_0");
+
+                if (firstTattooYes && firstTattooYes.checked) {
+                    document.getElementById("torso-option").classList.add("disabled");
                 } else {
-                    torsoOption.classList.remove("disabled");
+                    document.getElementById("torso-option").classList.remove("disabled");
                 }
-            });
+            } catch (error) {
+                console.warn("Unable to access parent form fields:", error);
+            }
         }
 
         JFCustomWidget.subscribe("ready", function() {
