@@ -67,20 +67,23 @@
             }
         }
 
+        // ✅ This function runs when the widget is fully loaded
         JFCustomWidget.subscribe("ready", function() {
-            // Initial check
-            const isFirstTattoo = JFCustomWidget.getWidgetSetting("typeA") === "YES";
-            disableTorsoOption(isFirstTattoo);
+            console.log("Widget is ready. Fetching first tattoo status...");
+
+            // Get the value of "Is this your first tattoo?" field (typeA)
+            JFCustomWidget.getWidgetSetting("typeA", function(value) {
+                console.log("First Tattoo Response:", value);
+                const isFirstTattoo = value && value.toLowerCase() === "yes";
+                disableTorsoOption(isFirstTattoo);
+            });
         });
 
-        JFCustomWidget.subscribe("submit", function(data) {
-            // Listen for form submissions if needed
-        });
-
-        // Listen for changes in the parent form
-        window.addEventListener("message", function(event) {
-            if (event.data && event.data.type === "control_radio" && event.data.name === "typeA") {
-                const isFirstTattoo = event.data.value === "YES";
+        // ✅ This function listens for real-time changes
+        JFCustomWidget.subscribe("change", function(data) {
+            if (data && data.type === "control_radio" && data.name === "typeA") {
+                console.log("First Tattoo Response Changed:", data.value);
+                const isFirstTattoo = data.value.toLowerCase() === "yes";
                 disableTorsoOption(isFirstTattoo);
             }
         });
