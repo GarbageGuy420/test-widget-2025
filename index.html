@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Body Placement Widget</title>
     <script src="//js.jotform.com/JotFormCustomWidget.min.js"></script>
-    <script src="https://js.jotform.com/JotForm.js"></script> <!-- ✅ Added JotForm API -->
+    <script src="https://js.jotform.com/JotForm.js"></script> <!-- ✅ JotForm API -->
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .option {
@@ -43,6 +43,9 @@
 
     <script>
         let selectedOption = null;
+        const apiKey = "2875655dc082f4f5b4566a3477e9cc6b";  // ✅ Your API Key
+        const formID = "250346801308047";  // ✅ Your Jotform Form ID
+        const questionName = "typeA";  // ✅ The unique name for "Is this your first tattoo?"
 
         function sendPlacement(selection) {
             JFCustomWidget.sendData({ value: selection });
@@ -68,35 +71,37 @@
             }
         }
 
-        // ✅ Initialize JotForm API with your key
-        JF.initialize({ apiKey: 'abf542a7c03442549209029236286710' });
+        // ✅ Fetch "Is this your first tattoo?" field dynamically
+        async function checkFirstTattooStatus() {
+            try {
+                let response = await fetch(`https://api.jotform.com/form/${formID}/questions?apiKey=${apiKey}`);
+                let data = await response.json();
 
-        // ✅ Listen for changes to "Is this your first tattoo?" field
-        JFCustomWidget.subscribe("change", function(data) {
-            if (data && data.name === "typeA") {
-                console.log("First Tattoo Selection Changed:", data.value);
-                
-                // ✅ Compare against the input ID for "YES"
-                const isFirstTattoo = (data.value === "input_3_0");  // Adjust if needed
-                disableTorsoOption(isFirstTattoo);
+                let firstTattooQuestion = Object.values(data.content).find(q => q.name === questionName);
+
+                if (firstTattooQuestion && firstTattooQuestion.defaultAnswer) {
+                    console.log("Initial Tattoo Response:", firstTattooQuestion.defaultAnswer);
+                    const isFirstTattoo = firstTattooQuestion.defaultAnswer.toLowerCase() === "yes";
+                    disableTorsoOption(isFirstTattoo);
+                }
+            } catch (error) {
+                console.error("Error fetching form data:", error);
             }
-        });
+        }
 
         // ✅ Ensure "TORSO" is disabled when the widget first loads
         JFCustomWidget.subscribe("ready", function() {
             console.log("Widget Ready: Fetching initial first tattoo status...");
+            checkFirstTattooStatus();
+        });
 
-            // ✅ Fetch form data using API
-            JF.getFormSubmissions("250346801308047", function(response) {
-                if (response && response.content && response.content.length > 0) {
-                    let latestSubmission = response.content[0];
-                    if (latestSubmission.answers && latestSubmission.answers["typeA"]) {
-                        console.log("Initial First Tattoo Response:", latestSubmission.answers["typeA"]);
-                        const isFirstTattoo = latestSubmission.answers["typeA"] === "input_3_0"; // Adjust as needed
-                        disableTorsoOption(isFirstTattoo);
-                    }
-                }
-            });
+        // ✅ Listen for changes to "Is this your first tattoo?" field
+        JFCustomWidget.subscribe("change", function(data) {
+            if (data && data.name === questionName) {
+                console.log("First Tattoo Selection Changed:", data.value);
+                const isFirstTattoo = data.value.toLowerCase() === "yes";
+                disableTorsoOption(isFirstTattoo);
+            }
         });
 
     </script>
